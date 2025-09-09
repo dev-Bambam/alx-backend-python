@@ -9,8 +9,6 @@
 import sqlite3
 import os
 
-
-
 # decorator to log sql queries
 def log_queries(func):
     def wrapper(*args, **kwargs):
