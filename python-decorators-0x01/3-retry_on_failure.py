@@ -37,31 +37,26 @@ def with_db_connection(func):
 
 
 def retry_on_failure(retries, delay):
-    retries += 1
     def decorator(func):
         def wrapper(*args, **kwargs):
-            counter = 1
-            while counter <= retries:
+            for attempt in range(1, retries + 1):
                 try:
-                    result = func(*args, **kwargs)
+                    return func(*args, **kwargs)
                 except sqlite3.Error as e:
-                    if counter < retries:
-                        print(f'Attempt {counter} failed. Retrying...')
-                        time.sleep(delay)
+                    if attempt == retries:
+                        print(f'Attempt {attempt} failed. Max retries exceeded.')
+                        print(f'{e}')
+                        # raise
                     else:
-                        print(f'Error:{e}')
-                else:
-                    return result 
-                counter += 1   
-
-            return result     
+                        print(f'Attempt {attempt} failed, Retrying in {delay}s')
+                        time.sleep(delay)
         return wrapper
     return decorator
 
                     
 
 @with_db_connection
-@retry_on_failure(retries=1, delay=2)
+@retry_on_failure(retries=4, delay=3)
 def fetch_users_with_retry(conn):
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM users')
