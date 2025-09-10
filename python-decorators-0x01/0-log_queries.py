@@ -1,10 +1,13 @@
-'''
-# Ok so I just learnt about decorator in python and it's really great, it's a great way of modifying the behavior of a function without changing the function's functionality itself. a decorator is a function that takes a function as an arg and return the function, the function the decorator take as an argument is the function/methods we want to decorate, then the decorator adds a wrapper function around the function which will have acess to the args of the function/methods that needs to be decorated, we return the decorator arg from the wrapper func so that the function can run and we return the wrapper as a variable.
+"""
+Objective: create a decorator that logs database queries executed by any function
 
-# ok so learnt about context manager using it to handle db connection, using context manager I don't need to worry about closing the connection once I am done
+Instructions:
 
-# also using os to work with file path instead of me using hardcoded code
-'''
+Complete the code below by writing a decorator log_queries that logs the SQL query before executing it.
+
+Prototype: def log_queries()
+
+"""
 
 import sqlite3
 import os

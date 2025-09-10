@@ -1,3 +1,12 @@
+"""
+Objective: create a decorator that automatically handles opening and closing database connections
+
+Instructions:
+
+Complete the script below by Implementing a decorator with_db_connection that opens a database connection, passes it to the function and closes it afterword
+
+"""
+
 import sqlite3
 import os
 
