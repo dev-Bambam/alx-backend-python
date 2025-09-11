@@ -21,33 +21,11 @@ def with_db_connection(func):
     return wrapper
 
 
-# @with_db_connection
-# def create_table(conn):
-#     try: 
-#         cursor = conn.cursor()
-#         cursor.execute(
-#         '''
-#             CREATE TABLE users(
-#                 id INTEGER PRIMARY KEY,
-#                 first_name VARCHAR(50) NOT NULL,
-#                 last_name VARCHAR(50) NOT NULL,
-#                 email UNIQUE NOT NULL
-#             )
-#         '''
-#         )
-#     except sqlite3.Error as e:
-#         print(f'DB_Error: {e}')
-#     else:
-#         print('table created successfully')
-
-
-
 def cache_query(func):
     cache = {}
     def wrapper(*args, **kwargs):
         cache_key  = kwargs['query']
         if cache_key in cache:
-            print('printed from cache')
             return cache[cache_key]
         else:
             result = func(*args, **kwargs)
