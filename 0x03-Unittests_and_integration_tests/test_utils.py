@@ -2,25 +2,14 @@
 '''
 A test file to carry out unit test on the utils module
 '''
-import unittest
+from unittest import TestCase
 from utils import access_nested_map
 from parameterized import parameterized
 
 
-class TestNestedMap(unittest.TestCase):
+class TestAccessNestedMap(TestCase):
     ''' A test class for the util module'''
 
-    """ The @parameterized.expand decorator is what allows us to run the same test method multiple times with different data.
-
-    It takes one argument: a list of tuples. Each tuple contains the arguments for one run of the test.
-
-    For each of your provided inputs, we need to create a tuple that contains:
-
-    The nested_map (the dictionary).
-
-    The path (the tuple of keys).
-
-    The expected result (the value the function should return). """
     @parameterized.expand([
         ({"a": 1}, ("a",), 1),
         ({"a": {"b": 2}}, ("a",), {"b": 2}),
