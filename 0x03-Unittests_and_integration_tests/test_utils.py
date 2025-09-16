@@ -41,8 +41,8 @@ class TestGetJson(TestCase):
     ])
     def test_get_json(self, uri, result):
         ''' Used mock.patch to send mock http request to the request.get'''
-        with mock.patch(requests.get) as mock_data:
-            mock_data.return_value = result
+        with mock.patch('requests.get') as mock_data:
+            mock_data.return_value.json.return_value = result
             response = get_json(uri)
             mock_data.assert_called_once_with(uri)
             self.assertEqual(response, result)
