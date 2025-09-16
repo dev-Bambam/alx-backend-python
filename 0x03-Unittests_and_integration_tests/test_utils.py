@@ -2,9 +2,10 @@
 '''
 A test file to carry out unit test on the utils module
 '''
-from unittest import TestCase
-from utils import access_nested_map
+from unittest import TestCase, mock
+from utils import access_nested_map, get_json
 from parameterized import parameterized
+import requests
 
 
 class TestAccessNestedMap(TestCase):
@@ -30,3 +31,18 @@ class TestAccessNestedMap(TestCase):
         with self.assertRaises(error):
             access_nested_map(nested_map, path)
                     
+
+class TestGetJson(TestCase):
+    'A test class to test get_json'
+
+    @parameterized([
+        ('http://example.com', {"payload": True}),
+        ('http://example.io', {"payload": False}),
+    ])
+    def test_get_json(self, uri, result):
+        ''' Used mock.patch to send mock http request to the request.get'''
+        with mock.patch(requests.get) as mock_data:
+            mock_data.return_value = result
+            response = get_json(uri)
+            mock_data.assert_called_once_with(uri)
+            self.assertEqual(response, result)
