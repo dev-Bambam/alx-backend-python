@@ -15,7 +15,7 @@ class TestAccessNestedMap(TestCase):
         ({"a": {"b": 2}}, ("a",), {"b": 2}),
         ({"a": {"b": 2}}, ("a", "b"), 2),
     ])
-    def test_acces_nested_map(self, nested_map, path, result):
+    def test_access_nested_map(self, nested_map, path, result):
         ''' Test that test the nested map and check if it returns the valid output with a valid input'''
 
         self.assertEqual(access_nested_map(nested_map, path), result)
