@@ -11,7 +11,7 @@ Prototype: def log_queries()
 
 import sqlite3
 import os
-from datetime import datetime
+# from datetime import datetime
 
 # decorator to log sql queries
 def log_queries(func):
