@@ -19,3 +19,14 @@ class TestAccessNestedMap(TestCase):
         ''' Test that test the nested map and check if it returns the valid output with a valid input'''
 
         self.assertEqual(access_nested_map(nested_map, path), result)
+
+    @parameterized.expand([
+        ({},('a', ), KeyError),
+        ({'a':1}, ('a','b'), KeyError)
+    ])
+    def test_access_nested_map_exception(self, nested_map, path, error):
+        ''' A Test that check if exception is raised for wrong input '''
+        
+        with self.assertRaises(error):
+            access_nested_map(nested_map, path)
+                    
