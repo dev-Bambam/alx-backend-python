@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-'''
+"""
 A test file to carry out unit test on the utils module
-'''
-from unittest import TestCase, mock
-from utils import access_nested_map, get_json
-from parameterized import parameterized
-import requests
+"""
 
+from unittest import TestCase, mock
+
+from parameterized import parameterized
+from utils import get_json
 
 # class TestAccessNestedMap(TestCase):
 #     ''' A test class for the util module'''
@@ -27,22 +27,24 @@ import requests
 #     ])
 #     def test_access_nested_map_exception(self, nested_map, path, error):
 #         ''' A Test that check if exception is raised for wrong input '''
-        
+
 #         with self.assertRaises(error):
 #             access_nested_map(nested_map, path)
-                    
+
 
 class TestGetJson(TestCase):
-    'A test class to test get_json'
+    "A test class to test get_json"
 
-    @parameterized.expand([
-        ('http://example.com', {"payload": True}),
-        ('http://example.io', {"payload": False}),
-    ])
-    def test_get_json(self, uri, result):
-        ''' Used mock.patch to send mock http request to the request.get'''
-        with mock.patch('requests.get') as mock_data:
-            mock_data.return_value.json.return_value = result
+    @parameterized.expand(
+        [
+            ("http://example.com", {"payload": True}),
+            ("http://example.io", {"payload": False}),
+        ]
+    )
+    def test_get_json(self, uri, result) -> str:
+        """Used mock.patch to send mock http request to the request.get"""
+        with mock.patch("requests.get") as mock_data :
+            mock_data.return_value.json.return_value = result 
             response = get_json(uri)
             mock_data.assert_called_once_with(uri)
             self.assertEqual(response, result)
