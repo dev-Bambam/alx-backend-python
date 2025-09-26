@@ -1,7 +1,9 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.exceptions import PermissionDenied
+from .pagination import StandardResultsSetPagination
+from filters import MessageFilter
 from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from .models import Chat, Message
 from .permissions import isParticipantOfConversation
@@ -10,6 +12,9 @@ from .serializers import ChatSerializer, MessageSerializer
 class ChatViewSet(viewsets.ModelViewSet):
     serializer_class = ChatSerializer
     permission_classes = [IsAuthenticated, isParticipantOfConversation]
+    pagination_class = StandardResultsSetPagination
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = MessageFilter
 
     def get_queryset(self):
         return Chat.objects.filter(user=self.request.user).order_by('-created_at')
@@ -21,6 +26,7 @@ class ChatViewSet(viewsets.ModelViewSet):
 class MessageViewSet(viewsets.ModelViewSet):
     serializer_class = MessageSerializer
     permission_classes = [IsAuthenticated, isParticipantOfConversation]
+
 
     def get_queryset(self):
         return Message.objects.filter(chat__user=self.request.user).order_by('timestamp')
