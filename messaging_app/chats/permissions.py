@@ -11,17 +11,20 @@ class isAuthenticatedAndOwner(permissions.BasePermission):
 class isParticipantOfConversation(permissions.BasePermission):
     '''Custom permission to allow a participant in a conversation to access it'''
 
+    def has_permission(self, request, view):
+        # Allow only authenitcated user to access the API
+        return request.user and request.user.is_authenticated
+
     def has_object_permission(self, request, view, obj):
-        # Check if the user is one of the participants in the conversation.
-        # This assumes your Chat model has a 'participants' field.
-        # For a simple user model, this means checking if the user is the owner.
-        # For a more complex model, you'd check a ManyToManyField.
-        # For this task, we will assume the conversation is linked to a user via ForeignKey
-        # and they are therefore a participant.
+        # Allow participants to view, update, and delete messages.
+        # This will be used for specific objects (messages or conversations).
 
-        if hasattr(obj, 'chat'):
-            chat = obj.chat
-        else:
-            chat = obj
-
-        return chat.user == request.user or request.user in chat.participants.all() if hasattr(chat, 'participant') else chat.user == request.user
+        # Read permissions are always allowed for authenticated participants
+        if request.method in permissions.SAFE_METHODS:
+            return obj.user == request.user
+        
+        # Write permissions (PUT, PATCH, DELETE) are restricted to the owner.
+        if request.method in ['PUT', 'PATCH', 'DELETE']:
+            return obj.user == request.user
+        
+        return False
