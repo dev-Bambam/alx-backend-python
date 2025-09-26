@@ -1,4 +1,4 @@
-from models import Message, Chat
+from .models import Message, Chat
 from rest_framework import serializers
 from django.contrib.auth.models import User
 

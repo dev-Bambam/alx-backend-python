@@ -12,5 +12,5 @@ class MessageFilter(django_filters.FilterSet):
 
     class Meta:
         model = Message
-        field = ['content', 'timestamp']
+        fields = ['content', 'timestamp']
 
