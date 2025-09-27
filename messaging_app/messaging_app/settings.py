@@ -37,8 +37,12 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "djangorestframework",
-    "django-filter",
+
+    # Third party app
+    "rest_framework",
+    "django_filter",
+
+    # Local app
     "chats",
 ]
 
@@ -123,3 +127,24 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# --- REST FRAMEWORK CONFIGURATION ---
+REST_FRAMEWORK = {
+    # REQUIRED FIX: Setting default authentication classes
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.BasicAuthentication",
+    ],
+    
+    # REQUIRED FIX: Setting default permission classes
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+
+    # Pagination settings (from previous tasks)
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 20,
+    
+    # Filtering settings (from previous tasks)
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+}
