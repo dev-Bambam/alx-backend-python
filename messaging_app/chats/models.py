@@ -46,10 +46,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         # Maps the ENUM requirements to Django's TextChoices for robust handling.
 
         GUEST = "guest", "Guest"
-        HOST = (
-            "host",
-            "Host",
-        )
+        HOST = "host", "Host"
         ADMIN = "admin", "Admin"
 
     # user_id (Primary Keys, UUID, Indexed)
@@ -135,4 +132,45 @@ class Conversation(models.Model):
         verbose_name = "Conversation"
         verbose_name_plural = 'Conversations'
         # Ensure that the most recent chats are listed first
-        ordering = ['-created']
+        ordering = ['-created_at']
+
+# 3. --- Message Model ---
+class Message(models.Model):
+    '''Rep a single message sent within a conversation'''
+    message_id = models.UUIDField(
+        primary_key=True,
+        default= uuid.uuid4,
+        editable=False,
+        verbose_name='Message ID'
+    )
+    sender = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE,
+        related_name='sent_messages',
+        verbose_name='Sender'
+    )
+    chat = models.ForeignKey(
+        Conversation,
+        on_delete=models.CASCADE,
+        related_name='messages',
+        verbose_name='Conversation'
+    )
+    message_body = models.TextField(
+        null=False, 
+        blank=False
+    )
+    sent_at = models.DateTimeField(default=timezone.now, editable=False)
+
+    # Additional Indexing on the foreign for faster lookup
+    class Meta:
+        verbose_name = 'Message'
+        verbose_name_plural = 'Messages'
+        ordering = ['sent_at']
+        # Add index for fast lookup by conversation and sender
+        indexes = [
+            models.Index(fields=['chat', 'sent_At']),
+            models.Index(fields=['sender'])
+        ]
+
+    def __str__(self):
+        return f'Message from {self.sender.email} in Chat {self.chat.conversation_id}'
