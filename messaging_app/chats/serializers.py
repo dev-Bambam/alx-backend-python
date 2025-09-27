@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from chats.models import Conversation, Message
+from .models import Conversation, Message
 
 # Get the custom User model defined in chats/models.py
 User = get_user_model()
