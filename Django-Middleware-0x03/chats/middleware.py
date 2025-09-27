@@ -1,7 +1,8 @@
-import logging
-from datetime import datetime, time, timedelta
+
+from django.http import HttpResponseForbidden, JsonResponse
 from django.contrib.auth.models import AnonymousUser
-from django.http import HttpResponseForbidden, JsonResponse # Added for 403 and rate limiting
+from datetime import datetime, time, timedelta
+import logging
 
 # --- Configuration for Rate Limiting ---
 # Global dictionary to store request times for rate limiting
@@ -140,5 +141,31 @@ class OffensiveLanguageMiddleware:
             IP_REQUEST_LOG[ip].append(now)
 
         # Proceed to the next middleware or the view
+        response = self.get_response(request)
+        return response
+
+
+class RolepermissionMiddleware:
+    """
+    Middleware to restrict access to the entire application based on the user's role.
+    Only allows users with the 'admin' or 'moderator' role to proceed.
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.allowed_roles = ['admin', 'moderator'] # Roles permitted to access the chat API
+
+    def __call__(self, request):
+        user = request.user
+        
+        # 1. Check if the user is authenticated (must happen after AuthenticationMiddleware)
+        if user.is_authenticated:
+            # 2. Check if the user's role is in the allowed list
+            if user.role not in self.allowed_roles:
+                # Deny access with a 403 Forbidden response
+                return HttpResponseForbidden(
+                    f"Access denied. Your role ('{user.role}') is not authorized to access this API."
+                )
+        
+        # If the user is anonymous (to allow login/register) or has an allowed role, proceed.
         response = self.get_response(request)
         return response
