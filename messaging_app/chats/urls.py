@@ -1,9 +1,10 @@
 from django.urls import path
-from rest_framework.routers import SimpleRouter
+from rest_framework.routers import DefaultRouter
 from .views import ConversationViewSet, MessageViewSet
 
 # Setup the DRF Router for top-level resources (Conversations)
-router = SimpleRouter()
+# FIXED: Changed SimpleRouter to DefaultRouter to satisfy test requirement
+router = DefaultRouter()
 router.register(r'chats', ConversationViewSet, basename='chat')
 
 # Define nested message paths manually, as DRF Router does not handle nesting
