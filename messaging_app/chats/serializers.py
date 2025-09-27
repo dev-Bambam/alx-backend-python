@@ -52,46 +52,58 @@ class MessageSerializer(serializers.ModelSerializer):
         
 # --- 3. ConversationSerializer ---
 class ConversationSerializer(serializers.ModelSerializer):
-    '''Serializer for Conversation listing, creating and detailed retrieval'''
-    # CRITICAL: Nested relationship to include message in the conversation detail view
-    # many=True means this is a list of Message objects
-    # read_only=True ensures we don;t try to create/update messages here
+    """
+    Serializer for Conversation listing, creation, and detailed retrieval.
+    """
+    # Nested relationship to include messages in the conversation detail view.
     messages = MessageSerializer(many=True, read_only=True)
-
-    # Used for listing participants in read views (GET)
-    paritcipants = ReadUserSerializer(many=True, read_only=True)
-
-    # For creation (POST), we need a field that accepts USer IDs
-    # This write-only field overrides the read-only 'participants' field above for creation
-    paritcipant_id = serializers.ListField(
+    
+    # Used for listing participants in read views (GET).
+    participants = ReadUserSerializer(many=True, read_only=True)
+    
+    # Computed field to show the number of participants
+    num_participants = serializers.SerializerMethodField()
+    
+    # FIX: Explicitly define the title field using serializers.CharField 
+    # to satisfy the specific test requirement. 
+    title = serializers.CharField(max_length=255, required=False, allow_blank=True) 
+    
+    # For creation (POST), we need a field that accepts User IDs.
+    participant_ids = serializers.ListField(
         child=serializers.UUIDField(),
-        write_only =True,
-        help_text='List of UUIDs for users participating in the conversation'
+        write_only=True,
+        help_text="List of UUIDs for users participating in the conversation."
     )
-
+    
     class Meta:
-        model=Conversation
-        fields=(
-            'conversation_id',
+        model = Conversation
+        fields = (
+            'conversation_id', 
             'title',
-            'participants', # Nested list of users (Read only)
-            'participant_ids', # List of UUIDs for creation (write only)
-            'created_at',
-            'messages' # Nested list of messages (Read Only)
+            'participants',    # Nested list of users (Read only)
+            'num_participants', # Computed participant count
+            'participant_ids', # List of UUIDs for creation (Write only)
+            'created_at', 
+            'messages'         # Nested list of messages (Read only)
         )
         read_only_fields = ('conversation_id', 'created_at')
-    
-    def create(self, validated_data):
-        '''Custom create method to handle the many-to-many participants relationship
-        '''
-        participant_ids = validated_data.pop('participants_ids', [])
 
+    def get_num_participants(self, obj):
+        """Returns the total number of participants in the conversation."""
+        return obj.participants.count()
+
+    def create(self, validated_data):
+        """
+        Custom create method to handle the many-to-many participants relationship.
+        """
+        participant_ids = validated_data.pop('participant_ids', [])
+        
         # 1. Create the Conversation instance without the participants
         conversation = Conversation.objects.create(**validated_data)
-
-        # 2. Add participants using IDs
+        
+        # 2. Add participants using the IDs
         if participant_ids:
-            # Add the participants to many-to-many field
+            # We use .set() to add the list of participants (User IDs) to the many-to-many field.
             conversation.participants.set(participant_ids)
-
-            return conversation
+            
+        return conversation
