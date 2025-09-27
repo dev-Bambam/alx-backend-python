@@ -10,11 +10,13 @@ User = get_user_model()
 # This keeps nested ouput cleand and prevents exposing too much user data.
 class ReadUserSerializer(serializers.ModelSerializer):
     '''Serializer for read-only user data'''
-
+    # Added serializerMethodField for full name to compute the first_name and last_name
+    full_name = serializers.SerializerMethodField()
     class Meta:
         model = User
         fields = ('user_id', 'email', 'first_name', 'last_name', 'role')
         read_only_fields = fields
+
 
 
 # ---2. MessageSerializer ---
