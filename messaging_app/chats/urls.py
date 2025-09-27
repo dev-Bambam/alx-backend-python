@@ -1,29 +1,26 @@
+# Suggested fix for chats/urls.py (Please apply this manually)
+
 from django.urls import path, include
-from rest_framework import routers
+# You must import the router from the installed nested routers package
+from rest_framework_nested import routers 
 from .views import ConversationViewSet, MessageViewSet
 
-# Setup the DRF Router for top-level resources (Conversations)
-# FIXED: Changed SimpleRouter to DefaultRouter to satisfy test requirement
+# 1. Use DefaultRouter for the primary resource
 router = routers.DefaultRouter()
 router.register(r'chats', ConversationViewSet, basename='chat')
 
-# Define nested message paths manually, as DRF Router does not handle nesting
-urlpatterns = [
-    # 1. URL for listing messages in a specific chat (GET) and sending a new message (POST)
-    # The <int:chat_pk> captures the ID of the parent conversation.
-    path(
-        'chats/<uuid:chat_pk>/messages/', 
-        MessageViewSet.as_view({'get': 'list', 'post': 'create'}), 
-        name='chat-messages-list'
-    ),
+# 2. Use NestedDefaultRouter to define the nested resource
+# The parent lookup value is 'chat_pk' which matches the view's kwargs
+chats_router = routers.NestedDefaultRouter(router, r'chats', lookup='chat') 
 
-    # 2. URL for retrieving, updating, or deleting a specific message (GET, PUT, DELETE)
-    path(
-        'chats/<uuid:chat_pk>/messages/<uuid:pk>/', 
-        MessageViewSet.as_view({'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}), 
-        name='chat-messages-detail'
-    ),
+# Register the nested messages endpoint
+chats_router.register(r'messages', MessageViewSet, basename='chat-messages') 
+
+# Combine all URLs
+urlpatterns = [
+    # Include the router URLs
+    path('', include(router.urls)), 
+    # Include the nested router URLs
+    path('', include(chats_router.urls)),
 ]
 
-# Append the router URLs (for /chats/ and /chats/{pk}/) to the list
-urlpatterns += router.urls
