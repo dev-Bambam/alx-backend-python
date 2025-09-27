@@ -1,5 +1,3 @@
-# Suggested fix for chats/urls.py (Please apply this manually)
-
 from django.urls import path, include
 # You must import the router from the installed nested routers package
 from rest_framework_nested import routers 

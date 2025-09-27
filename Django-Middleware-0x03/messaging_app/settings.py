@@ -41,6 +41,7 @@ MIDDLEWARE = [
     # CRITICAL: Register your custom middleware here. 
     # Must be after AuthenticationMiddleware to access request.user.
     'chats.middleware.RequestLoggingMiddleware', 
+    'chats.middleware.OffensiveLanguageMiddleware',
     
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',

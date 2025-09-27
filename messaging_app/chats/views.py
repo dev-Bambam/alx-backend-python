@@ -5,17 +5,7 @@ from django.shortcuts import get_object_or_404
 
 from .models import Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer
-
-# --- Placeholder Custom Permission ---
-# This class ensures that a user can only interact with a conversation if they are a participant.
-# In a full project, this would live in chats/permissions.py
-class IsConversationParticipant(permissions.BasePermission):
-    """
-    Permission check to ensure the requesting user is part of the conversation.
-    """
-    def has_object_permission(self, request, view, obj):
-        # The object here is the Conversation instance.
-        return request.user in obj.participants.all()
+from .permissions import IsConversationParticipant
 
 
 # --- 1. Conversation ViewSet (Top-level resource: /api/chats/) ---
