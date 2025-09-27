@@ -35,6 +35,11 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    
+    # CRITICAL: Register your custom middleware here. 
+    # Must be after AuthenticationMiddleware to access request.user.
+    'chats.middleware.RequestLoggingMiddleware', 
+    
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -140,4 +145,26 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),  # Refresh tokens are valid for 7 days
     'ROTATE_REFRESH_TOKENS': True, # Enhances security
     'AUTH_HEADER_TYPES': ('Bearer',), # Standard header type for API tokens
+}
+
+# --- Logging Configuration (NEW) ---
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            # This handler writes to the requests.log file at the project root
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'requests.log', 
+        },
+    },
+    'loggers': {
+        # Define a custom logger to capture our request info
+        'request_logger': { 
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
 }
