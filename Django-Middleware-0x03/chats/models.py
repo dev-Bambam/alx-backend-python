@@ -7,6 +7,10 @@ from django.contrib.auth.models import (
 from django.core.validators import RegexValidator
 from django.db import models
 from django.utils import timezone
+import logging
+
+# Set up logging for the CustomUserManager
+logger = logging.getLogger(__name__)
 
 # --- Custom User Manager (Required for AbstractBaseUSer)
 
@@ -28,7 +32,7 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
         extra_fields.setdefault("is_active", True)
-        extra_fields.setdefault("role", self.model.Role.Admin)
+        extra_fields.setdefault("role", self.model.Role.ADMIN) 
 
         if extra_fields.get("is_staff") is not True:
             raise ValueError("Superuser must have is_staff=True")
@@ -44,10 +48,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     class Role(models.TextChoices):
         # Maps the ENUM requirements to Django's TextChoices for robust handling.
-
         GUEST = "guest", "Guest"
         HOST = "host", "Host"
         ADMIN = "admin", "Admin"
+        MODERATOR = "moderator", "Moderator" 
 
     # user_id (Primary Keys, UUID, Indexed)
     user_id = models.UUIDField(
@@ -58,7 +62,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True, null=False, blank=False)
     first_name = models.CharField(max_length=150, null=False, blank=False)
     last_name = models.CharField(max_length=150, null=False, blank=False)
-    # password_hash is handled by AbstractBaseUser
+    
     phone_number = models.CharField(
         max_length=15,
         null=True,
@@ -98,26 +102,31 @@ class User(AbstractBaseUser, PermissionsMixin):
         return f'{self.first_name} {self.last_name}'.strip()
     
     class Meta:
-        verbose_name = 'User',
+        verbose_name = 'User' 
         verbose_name_plural = 'Users'
+        indexes = [
+            models.Index(fields=['email']),
+        ]
 
 # 2. Conversation Model 
 class Conversation(models.Model):
-    '''Rep a chat conversation between multiple user'''
+    '''Represents a chat conversation between multiple users'''
     conversation_id = models.UUIDField(
         primary_key=True,
         default=uuid.uuid4,
         editable=False,
         verbose_name='Conversation ID'
     )
+    # Participants is a ManyToMany relationship linking to the User model
     participants = models.ManyToManyField(
         User,
         related_name='conversations',
         verbose_name='Participants'
     )
-    created_at = models.CharField(
+    created_at = models.DateTimeField( 
         default=timezone.now,
-        editable=False
+        editable=False,
+        verbose_name='Creation Timestamp'
     )
     title = models.CharField(
         max_length=255, blank=True, null=True
@@ -126,17 +135,22 @@ class Conversation(models.Model):
     def __str__(self):
         if self.title:
             return self.title
-        return f'Conversation({self.conversation_id})'
+        participant_emails = ", ".join(self.participants.values_list('email', flat=True)[:3]) 
+        return f'Chat with {participant_emails}...'
     
     class Meta:
         verbose_name = "Conversation"
         verbose_name_plural = 'Conversations'
         # Ensure that the most recent chats are listed first
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['-created_at']), # Index for the primary ordering field
+        ]
+
 
 # 3. --- Message Model ---
 class Message(models.Model):
-    '''Rep a single message sent within a conversation'''
+    '''Represents a single message sent within a conversation'''
     message_id = models.UUIDField(
         primary_key=True,
         default= uuid.uuid4,
@@ -161,16 +175,17 @@ class Message(models.Model):
     )
     sent_at = models.DateTimeField(default=timezone.now, editable=False)
 
+    def __str__(self):
+        body_preview = self.message_body[:50] + '...' if len(self.message_body) > 50 else self.message_body
+        return f'Msg by {self.sender.email} in Chat {self.chat.conversation_id}: "{body_preview}"'
+
     # Additional Indexing on the foreign for faster lookup
     class Meta:
         verbose_name = 'Message'
         verbose_name_plural = 'Messages'
         ordering = ['sent_at']
-        # Add index for fast lookup by conversation and sender
         indexes = [
-            models.Index(fields=['chat', 'sent_At']),
+            # Combined index for fast retrieval of messages within a chat, ordered by time
+            models.Index(fields=['chat', 'sent_at']), 
             models.Index(fields=['sender'])
         ]
-
-    def __str__(self):
-        return f'Message from {self.sender.email} in Chat {self.chat.conversation_id}'
