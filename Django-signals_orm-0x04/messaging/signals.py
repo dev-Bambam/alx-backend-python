@@ -1,11 +1,13 @@
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import post_save, pre_save, post_delete
 from django.dispatch import receiver
 from .models import Message, Notification, MessageHistory
 import logging
+from django.contrib.auth import get_user_model
 
 # set up a logger for signal  tracking
 logger = logging.getLogger(__name__)
 
+User = get_user_model()
 @receiver(post_save, sender=Message)
 def create_notification_on_new_message(sender, instance, created, **kwargs):
     '''
@@ -66,3 +68,21 @@ def log_message_pre_save(sender, instance, **kwargs):
             logger.warning(f'Message ID {instance.pk} not found during pre_save log')
         except Exception as e:
             logger.error(f'Unhandled error in pre_save signal: {e}')
+
+@receiver(post_delete, sender=User)
+def delete_user_data_on_account_delete(sender, instance, **kwargs):
+    user_id = instance.pk
+    user_email = instance.email
+
+    # 1. Delete all messages sent by this user.
+    #  This deletion will cascade to associated MessageHistory entries.
+    sent_count, _ = Message.objects.filter(sender=instance).delete()
+    
+    # 2. Delete all messages receieved by this user
+    received_count, _ = Message.objects.filter(receiver=instance).delete()
+
+    # 3. Cleand up any remaining notifications (optional if using CASCADE)
+    notif_count = Notification.objects.filter(user=instance).delete()
+
+    # Audit Log
+    logger.critical(f'ACCOUNT DELETION SUCCESS: User {user_email} (ID: {user_id}) and all associated data have been purged')
