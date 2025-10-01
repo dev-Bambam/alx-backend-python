@@ -10,15 +10,15 @@ User = get_user_model()
 @login_required
 def delete_user_account(request):
     if request.method == 'POST':
-        user_to_delete = request.user
-        if user_to_delete.is_authenticated:
+        user = request.user
+        if user.is_authenticated:
             return HttpResponseForbidden('Authentication is required to this action')
         
         try:
-            user_id = user_to_delete.id
-            user_email = user_to_delete.email
+            user_id = user.id
+            user_email = user.email
 
-            user_to_delete.delete()
+            user.delete()
 
             # Since the user is now deleted, we log them out and send a success message.
             # In a real API, this would return a 204 No Content response
