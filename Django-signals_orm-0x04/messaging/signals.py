@@ -14,7 +14,7 @@ def create_notification_on_new_message(sender, instance, created, **kwargs):
     Arugements:
     - sender: The Message class (the model that sent the signal)
     - instance: the actual Message object that was just saved
-    - created: Boolean. True if the pbject was just created; False if it was updated
+    - created: Boolean. True if the object was just created; False if it was updated
     - **kwargs: Other arguments provided by the signal
     '''
 
