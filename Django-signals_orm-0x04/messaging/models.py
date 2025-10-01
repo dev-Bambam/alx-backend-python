@@ -27,6 +27,7 @@ class Message(models.Model):
         default=timezone.now,
         editable=False
     )
+    edited = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = 'Message'
@@ -67,3 +68,26 @@ class Notification(models.Model):
     def __str__(self):
         read_status = "READ" if self.is_read else 'NEW'
         return f'[{read_status}] New message from {self.message.sender}'
+    
+class MessageHistory(models.Model):
+    """
+    Stores the previous content of a Message before an update occurs.
+    This model is populated by the pre_save signal.
+    """
+    message = models.ForeignKey(
+        Message,
+        on_delete=models.CASCADE,
+        related_name='history', # Allows access: message.history.all()
+        verbose_name='Original Message'
+    )
+    old_content = models.TextField()
+    # Records when the update happened (not when the original message was sent)
+    edited_at = models.DateTimeField(default=timezone.now) 
+    
+    class Meta:
+        verbose_name = "Message History"
+        verbose_name_plural = "Message History"
+        ordering = ['-edited_at']
+
+    def __str__(self):
+        return f"History of {self.message.id} saved at {self.edited_at.strftime('%Y-%m-%d %H:%M')}"

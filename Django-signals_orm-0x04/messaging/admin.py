@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Message, Notification
+from .models import Message, Notification, MessageHistory
 
 
 @admin.register(Message)
@@ -25,3 +25,14 @@ class NotificationAdmin(admin.ModelAdmin):
     def message_sender(self, obj):
         return obj.message.sender.email
     message_sender.short_description = 'Message Sender'
+
+@admin.register(MessageHistory) # Register the history model separately
+class MessageHistoryAdmin(admin.ModelAdmin):
+    list_display = ('message', 'old_content_preview', 'edited_at')
+    list_filter = ('edited_at',)
+    search_fields = ('message__content', 'old_content')
+    ordering = ('-edited_at',)
+
+    def old_content_preview(self, obj):
+        return obj.old_content[:50] + '...' if len(obj.old_content) > 50 else obj.old_content
+    old_content_preview.short_description = 'Previous Content'
