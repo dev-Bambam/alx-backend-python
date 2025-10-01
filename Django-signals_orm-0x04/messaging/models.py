@@ -83,7 +83,10 @@ class MessageHistory(models.Model):
     old_content = models.TextField()
     # Records when the update happened (not when the original message was sent)
     edited_at = models.DateTimeField(default=timezone.now) 
-    
+    edited_by = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
     class Meta:
         verbose_name = "Message History"
         verbose_name_plural = "Message History"
