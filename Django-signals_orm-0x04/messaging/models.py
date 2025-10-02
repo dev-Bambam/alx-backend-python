@@ -22,6 +22,16 @@ class Message(models.Model):
          related_name='recieved_messages',
          verbose_name='Reciever'
     )
+    # This is call 'Adjacency List where a model reference itself
+    # we are using this for threaded conversation to store replies to a message
+    parent_message = models.ForeignKey(
+        'self',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='replies',
+        verbose_name='Reply to'
+    )
     content = models.TextField()
     timestamp = models.DateTimeField(
         default=timezone.now,
