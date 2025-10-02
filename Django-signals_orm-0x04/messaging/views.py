@@ -48,6 +48,7 @@ def serialize_message(message):
 
 @login_required
 def get_threaded_messages(request):
+    sender = request.user
     '''
     Fetches all top-level messages and their replies efficiently,
     demonstrating select_related and prefetch_related
@@ -57,7 +58,7 @@ def get_threaded_messages(request):
     top_level_messages = Message.objects.filter(
         parent_message__isnull=True
     ).select_related(
-        'sender',
+        sender,
         'reciever'
     ).prefetch_related(
         # Use bulk query to fetch all immediate replies for the entire queryset
