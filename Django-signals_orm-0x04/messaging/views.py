@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 import logging
 import json
+from django.db.models import Q
 from .models import Message
 
 logger = logging.getLogger(__name__)
@@ -57,6 +58,9 @@ def get_threaded_messages(request):
     # start by filtering for only top-level (those with no parent)
     top_level_messages = Message.objects.filter(
         parent_message__isnull=True
+    ).filter(
+        # Filter: User must be involved as sender OR receiver of the top message
+        Q(sender=request.user) | Q(receiver=request.user)
     ).select_related(
         sender,
         'reciever'
