@@ -92,3 +92,28 @@ def get_threaded_messages(request):
         {'threads': threaded_data},
         status = 200
     )
+
+@login_required
+def get_unread_message(request):
+    unread_message_qs = Message.unread_objects.for_user(request.user).only(
+        'id',
+        'sender',
+        'content',
+        'timestamp'
+        'read'
+    ).select_related(
+        'sender'
+    ).order_by('timestamp')
+
+    unread_data = [{
+        'id': msg.id,
+        'sender_email': msg.sender.email,
+        'content': msg.content,
+        'timestamp': msg.timestamp.isoformat(),
+        'read': msg.read
+    } for msg in unread_message_qs]
+
+    return JsonResponse(
+        {'unread_inbox': unread_data},
+        status = 200
+    )

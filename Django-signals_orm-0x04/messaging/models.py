@@ -5,6 +5,18 @@ from django.contrib.auth import get_user_model
 # Get the active User model for the Foreign Key relationaship
 User = get_user_model()
 
+# ---- Custom Manager ----
+class UnreadMessagesManager(models.Manager):
+    def for_user(self, user):
+        '''
+        Returns a QuerySet of message recieved by the user that have not been read
+        '''
+        return self.get_queryset().filter(
+            reciever = user,
+            read = False
+        )
+
+
 class Message(models.Model):
     '''
     Rep a communication sent from one user to another 
@@ -38,7 +50,11 @@ class Message(models.Model):
         editable=False
     )
     edited = models.BooleanField(default=False)
+    read = models.BooleanField(default=False)
 
+    # Register Custom Mangers
+    objects = models.Manager()
+    unread_objects = UnreadMessagesManager()
     class Meta:
         verbose_name = 'Message'
         verbose_name_plural = 'Messages'
