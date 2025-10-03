@@ -43,7 +43,7 @@ class Message(models.Model):
 
     # Register Custom Mangers
     objects = models.Manager()
-    unread_objects = UnreadMessagesManager()
+    unread = UnreadMessagesManager()
     class Meta:
         verbose_name = 'Message'
         verbose_name_plural = 'Messages'

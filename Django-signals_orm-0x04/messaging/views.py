@@ -93,7 +93,7 @@ def get_threaded_messages(request):
 
 @login_required
 def get_unread_message(request):
-    unread_message_qs = Message.unread_objects.unread_for_user(request.user).only(
+    unread_message_qs = Message.unread.unread_for_user(request.user).only(
         'id',
         'sender',
         'content',
