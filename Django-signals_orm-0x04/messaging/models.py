@@ -1,21 +1,10 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth import get_user_model
+from .managers import UnreadMessagesManager
 
 # Get the active User model for the Foreign Key relationaship
 User = get_user_model()
-
-# ---- Custom Manager ----
-class UnreadMessagesManager(models.Manager):
-    def for_user(self, user):
-        '''
-        Returns a QuerySet of message recieved by the user that have not been read
-        '''
-        return self.get_queryset().filter(
-            reciever = user,
-            read = False
-        )
-
 
 class Message(models.Model):
     '''

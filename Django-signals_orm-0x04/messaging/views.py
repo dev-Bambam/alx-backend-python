@@ -1,9 +1,7 @@
-from django.shortcuts import render
 from django.http import HttpResponseForbidden, HttpResponseBadRequest, HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 import logging
-import json
 from django.db.models import Q
 from .models import Message
 
@@ -95,7 +93,7 @@ def get_threaded_messages(request):
 
 @login_required
 def get_unread_message(request):
-    unread_message_qs = Message.unread_objects.for_user(request.user).only(
+    unread_message_qs = Message.unread_objects.unread_for_user(request.user).only(
         'id',
         'sender',
         'content',
