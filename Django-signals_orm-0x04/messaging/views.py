@@ -4,6 +4,8 @@ from django.contrib.auth import get_user_model
 import logging
 from django.db.models import Q
 from .models import Message
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -46,6 +48,7 @@ def serialize_message(message):
     }
 
 @login_required
+@method_decorator(cache_page(60))
 def get_threaded_messages(request):
     sender = request.user
     '''
